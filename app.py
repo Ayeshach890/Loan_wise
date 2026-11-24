@@ -585,7 +585,12 @@ elif selected == screens[9]:
         str(len(app.receipts))
     )
 
-    st.progress(paid / max(loan.months, 1))
+   
+    paid = int(paid)
+total_months = int(loan.months)
+
+progress = paid / max(total_months, 1)
+st.progress(min(max(progress, 0.0), 1.0))
 
     st.divider()
     st.markdown("### Payment Records")
