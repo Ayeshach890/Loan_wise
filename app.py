@@ -24,41 +24,85 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+
+/* Overall screen */
 .stApp {
-    background-color: #0F172A;
+    background: #0F172A;
     color: #F8FAFC;
 }
 
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: #111827;
+    background: #111827;
 }
 
+[data-testid="stSidebar"] * {
+    font-size: 13px !important;
+}
+
+/* Main content */
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    max-width: 100%;
+}
+
+/* Headings */
+h1 {
+    font-size: 25px !important;
+}
+
+h2 {
+    font-size: 21px !important;
+}
+
+h3 {
+    font-size: 17px !important;
+}
+
+/* Normal text */
+p, label, span, li {
+    font-size: 13px !important;
+}
+
+/* Metrics */
 [data-testid="stMetric"] {
-    background-color: #1E293B;
-    padding: 18px;
+    background: #1E293B;
+    padding: 10px;
     border: 1px solid #334155;
-    border-radius: 12px;
+    border-radius: 9px;
 }
 
-h1, h2, h3 {
-    color: #F8FAFC !important;
+[data-testid="stMetricValue"] {
+    font-size: 20px !important;
 }
 
-p, label {
-    color: #CBD5E1;
+[data-testid="stMetricLabel"] {
+    font-size: 12px !important;
 }
 
+/* Buttons */
 .stButton > button {
-    background-color: #6366F1;
-    color: white;
-    border-radius: 8px;
-    border: none;
-    padding: 9px 18px;
+    font-size: 13px !important;
+    padding: 5px 12px;
+    border-radius: 7px;
 }
 
-.stButton > button:hover {
-    background-color: #4F46E5;
-    color: white;
+/* Inputs */
+input, textarea {
+    font-size: 13px !important;
+}
+
+/* Tables */
+[data-testid="stDataFrame"] {
+    font-size: 12px;
+}
+
+/* Reduce spacing */
+div[data-testid="stVerticalBlock"] {
+    gap: 0.7rem;
 }
 
 hr {
@@ -67,7 +111,6 @@ hr {
 
 </style>
 """, unsafe_allow_html=True)
-
 
 # =====================================================
 # 3. INITIAL DATA
