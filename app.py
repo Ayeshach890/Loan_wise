@@ -557,22 +557,24 @@ elif selected == screens[8]:
     if approved:
         st.success("APPLICATION STATUS: APPROVED")
     else:
-        st.info("APPLICATION STATUS: IN REVIEW")
-
-# =====================================================
-# 10. REPAYMENT & RECEIPTS
-# =====================================================
-elif selected == screens[9]:
-
-    st.subheader("Payment History & Digital Receipts")
-
-    paid = app.paid_installments
-
-    c1, c2, c3 = st.columns(3)
+            c1, c2, c3 = st.columns(3)
 
     c1.metric(
-        "Installments Paid",
-           paid = int(paid)
+        "Payments Completed",
+        f"{paid}/{loan.months}"
+    )
+
+    c2.metric(
+        "Monthly EMI",
+        f"PKR {emi:,.2f}"
+    )
+
+    c3.metric(
+        "Receipts Issued",
+        str(len(app.receipts))
+    )
+
+    paid = int(paid)
     total_months = int(loan.months)
 
     progress = paid / max(total_months, 1)
@@ -589,20 +591,15 @@ elif selected == screens[9]:
             receipt_data.append({
                 "Receipt ID": receipt.receipt_id,
                 "Month": receipt.month_number,
-                "Amount Paid": receipt.amount_paid
             })
 
-        receipt_df = pd.DataFrame(receipt_data)
-
         st.dataframe(
-            receipt_df,
-            use_container_width=True,
-            hide_index=True
+            receipt_data,
+            use_container_width=True
         )
 
-        st.download_button(
-            "Download Payment History",
-            receipt_df.to_csv(index=False),
+    else:
+        st.info("No payment records available yet.")
             file_name="LoanWise_Payment_History.csv",
             mime="text/csv"
         )
