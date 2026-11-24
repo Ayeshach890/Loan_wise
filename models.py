@@ -160,16 +160,17 @@ class Loan:
         return schedule
 
 
-@dataclass
+
+
 
 @dataclass
 class LoanApplication:
     app_id: str
     applicant: Applicant
     loan: Loan
+    receipts: list = field(default_factory=list)
     status: str = "Pending"
     notes: str = ""
-    receipts: list = field(default_factory=list)
     terms_accepted: bool = False
 
     @property
@@ -202,3 +203,4 @@ class LoanApplication:
 
         self.receipts.append(receipt)
         return receipt
+
