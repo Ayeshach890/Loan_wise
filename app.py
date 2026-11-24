@@ -572,25 +572,11 @@ elif selected == screens[9]:
 
     c1.metric(
         "Installments Paid",
-        f"{paid}/{loan.months}"
-    )
+           paid = int(paid)
+    total_months = int(loan.months)
 
-    c2.metric(
-        "Monthly EMI",
-        f"PKR {emi:,.2f}"
-    )
-
-    c3.metric(
-        "Receipts Issued",
-        str(len(app.receipts))
-    )
-
-   
-    paid = int(paid)
-total_months = int(loan.months)
-
-progress = paid / max(total_months, 1)
-st.progress(min(max(progress, 0.0), 1.0))
+    progress = paid / max(total_months, 1)
+    st.progress(min(max(progress, 0.0), 1.0))
 
     st.divider()
     st.markdown("### Payment Records")
