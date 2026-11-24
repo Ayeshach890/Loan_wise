@@ -1,8 +1,14 @@
 
 import streamlit as st
 import pandas as pd
+
 from models import Applicant, Loan, LoanApplication, is_valid_cnic
 from analysis import LoanMathematicalAnalyzer
+
+
+# =====================================================
+# 1. PAGE CONFIGURATION
+# =====================================================
 
 st.set_page_config(
     page_title="Loan Wise | Financial Analytics",
@@ -11,33 +17,64 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------- PROFESSIONAL DESIGN ----------
+
+# =====================================================
+# 2. PROFESSIONAL DESIGN
+# =====================================================
+
 st.markdown("""
 <style>
-.stApp {background:#0F172A;color:#F8FAFC;}
-[data-testid="stSidebar"] {background:#111827;}
+.stApp {
+    background-color: #0F172A;
+    color: #F8FAFC;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #111827;
+}
+
 [data-testid="stMetric"] {
-    background:#1E293B;
-    padding:18px;
-    border:1px solid #334155;
-    border-radius:12px;
+    background-color: #1E293B;
+    padding: 18px;
+    border: 1px solid #334155;
+    border-radius: 12px;
 }
-h1,h2,h3 {color:#F8FAFC !important;}
-p,label {color:#CBD5E1;}
-.stButton>button {
-    background:#6366F1;
-    color:white;
-    border-radius:8px;
-    border:none;
-    padding:9px 18px;
+
+h1, h2, h3 {
+    color: #F8FAFC !important;
 }
-.stButton>button:hover {background:#4F46E5;color:white;}
-hr {border-color:#334155;}
+
+p, label {
+    color: #CBD5E1;
+}
+
+.stButton > button {
+    background-color: #6366F1;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    padding: 9px 18px;
+}
+
+.stButton > button:hover {
+    background-color: #4F46E5;
+    color: white;
+}
+
+hr {
+    border-color: #334155;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- INITIAL DATA ----------
+
+# =====================================================
+# 3. INITIAL DATA
+# =====================================================
+
 if "application" not in st.session_state:
+
     applicant = Applicant(
         full_name="Demo Applicant",
         cnic="",
@@ -59,15 +96,18 @@ if "application" not in st.session_state:
         loan=loan
     )
 
-if "documents" not in st.session_state:
-    st.session_state.documents = []
 
 app = st.session_state.application
 applicant = app.applicant
 loan = app.loan
+
 analyzer = LoanMathematicalAnalyzer()
 
-# ---------- NAVIGATION ----------
+
+# =====================================================
+# 4. NAVIGATION
+# =====================================================
+
 screens = [
     "Executive Overview",
     "Applicant & Eligibility",
@@ -81,38 +121,47 @@ screens = [
     "Repayment & Receipts"
 ]
 
+
 st.sidebar.markdown("# 🏦 LOAN WISE")
 st.sidebar.caption("Financial Analytics Suite")
 st.sidebar.divider()
 
 selected = st.sidebar.radio(
     "NAVIGATION",
-    screens,
-    index=0
+    screens
 )
 
 st.sidebar.divider()
+
 st.sidebar.markdown("### Application Details")
 st.sidebar.write(f"**Reference:** {app.app_id}")
 st.sidebar.write(f"**Status:** {app.status}")
 st.sidebar.caption("Financial Analytics Project")
 
+
 st.title(selected)
 st.caption(f"Loan Wise | {app.app_id}")
 st.divider()
 
-# ---------- COMMON CALCULATIONS ----------
+
+# =====================================================
+# 5. COMMON CALCULATIONS
+# =====================================================
+
 emi = loan.calculate_emi()
 total = loan.total_payable()
 interest = loan.total_interest()
 schedule = loan.generate_schedule()
 
+
 # =====================================================
-# 1. EXECUTIVE OVERVIEW
+# 6. EXECUTIVE OVERVIEW
 # =====================================================
+
 if selected == screens[0]:
 
     st.subheader("Financial Overview")
+
     st.write(
         "A professional financial analytics platform "
         "for loan evaluation, EMI simulation, amortization "
@@ -121,46 +170,91 @@ if selected == screens[0]:
 
     c1, c2, c3, c4 = st.columns(4)
 
-    c1.metric("Loan Principal", f"PKR {loan.principal:,.0f}")
-    c2.metric("Monthly EMI", f"PKR {emi:,.2f}")
-    c3.metric("Total Interest", f"PKR {interest:,.2f}")
-    c4.metric("Application Status", app.status)
+    c1.metric(
+        "Loan Principal",
+        f"PKR {loan.principal:,.0f}"
+    )
+
+    c2.metric(
+        "Monthly EMI",
+        f"PKR {emi:,.2f}"
+    )
+
+    c3.metric(
+        "Total Interest",
+        f"PKR {interest:,.2f}"
+    )
+
+    c4.metric(
+        "Application Status",
+        app.status
+    )
 
     st.divider()
+
     st.subheader("Loan Principal vs Interest")
 
-    st.bar_chart(pd.DataFrame({
+    chart_data = pd.DataFrame({
         "Amount (PKR)": {
             "Principal": loan.principal,
             "Interest": interest
         }
-    }))
+    })
+
+    st.bar_chart(chart_data)
 
     col1, col2 = st.columns(2)
 
     with col1:
+
         st.markdown("### Applicant")
+
         st.write(applicant.full_name)
-        st.write(f"Monthly Income: PKR {applicant.monthly_income:,.2f}")
-        st.write(f"Credit Score: {applicant.credit_score}")
+
+        st.write(
+            f"Monthly Income: PKR "
+            f"{applicant.monthly_income:,.2f}"
+        )
+
+        st.write(
+            f"Credit Score: {applicant.credit_score}"
+        )
 
     with col2:
+
         st.markdown("### Loan Summary")
+
         st.write(f"Tenure: {loan.months} months")
-        st.write(f"Annual Rate: {loan.annual_rate * 100:.2f}%")
-        st.write(f"Total Payable: PKR {total:,.2f}")
+
+        st.write(
+            f"Annual Rate: "
+            f"{loan.annual_rate * 100:.2f}%"
+        )
+
+        st.write(
+            f"Total Payable: PKR {total:,.2f}"
+        )
+
 
 # =====================================================
-# 2. APPLICANT & ELIGIBILITY
+# 7. APPLICANT & ELIGIBILITY
 # =====================================================
+
 elif selected == screens[1]:
 
     st.subheader("Applicant Profile")
 
     with st.form("applicant_form"):
 
-        name = st.text_input("Full Name", applicant.full_name)
-        cnic = st.text_input("CNIC (13 digits)", applicant.cnic)
+        name = st.text_input(
+            "Full Name",
+            applicant.full_name
+        )
+
+        cnic = st.text_input(
+            "CNIC (13 digits)",
+            applicant.cnic
+        )
 
         income = st.number_input(
             "Monthly Income (PKR)",
@@ -192,13 +286,19 @@ elif selected == screens[1]:
         )
 
         if submitted:
+
             if not name.strip():
+
                 st.error("Applicant name is required.")
 
             elif income <= 0:
-                st.error("Monthly income must be greater than zero.")
+
+                st.error(
+                    "Monthly income must be greater than zero."
+                )
 
             else:
+
                 applicant.full_name = name.strip()
                 applicant.cnic = cnic.strip()
                 applicant.monthly_income = income
@@ -208,7 +308,9 @@ elif selected == screens[1]:
 
                 applicant.kyc_verified = False
 
-                st.success("Applicant profile saved.")
+                st.success(
+                    "Applicant profile saved."
+                )
 
                 eligible, message = app.is_eligible()
 
@@ -218,6 +320,7 @@ elif selected == screens[1]:
                     st.warning(message)
 
     st.divider()
+
     st.subheader("Affordability Analysis")
 
     st.metric(
@@ -230,9 +333,11 @@ elif selected == screens[1]:
         f"PKR {emi:,.2f}"
     )
 
+
 # =====================================================
-# 3. EMI & LOAN SIMULATOR
+# 8. EMI & LOAN SIMULATOR
 # =====================================================
+
 elif selected == screens[2]:
 
     st.subheader("Loan Parameters")
@@ -240,6 +345,7 @@ elif selected == screens[2]:
     col1, col2 = st.columns(2)
 
     with col1:
+
         principal = st.number_input(
             "Principal Amount (PKR)",
             min_value=1.0,
@@ -261,23 +367,40 @@ elif selected == screens[2]:
         )
 
         if st.button("Apply Loan Simulation"):
+
             loan.principal = principal
             loan.annual_rate = annual_rate / 100
             loan.months = int(months)
 
-            st.success("Loan simulation updated successfully.")
+            st.success(
+                "Loan simulation updated successfully."
+            )
+
             st.rerun()
 
     with col2:
+
         current_emi = loan.calculate_emi()
 
         st.markdown("### Simulation Results")
 
-        st.metric("Monthly EMI", f"PKR {current_emi:,.2f}")
-        st.metric("Total Interest", f"PKR {loan.total_interest():,.2f}")
-        st.metric("Total Payable", f"PKR {loan.total_payable():,.2f}")
+        st.metric(
+            "Monthly EMI",
+            f"PKR {current_emi:,.2f}"
+        )
+
+        st.metric(
+            "Total Interest",
+            f"PKR {loan.total_interest():,.2f}"
+        )
+
+        st.metric(
+            "Total Payable",
+            f"PKR {loan.total_payable():,.2f}"
+        )
 
     st.divider()
+
     st.subheader("Compounding Comparison")
 
     years = st.number_input(
@@ -288,18 +411,42 @@ elif selected == screens[2]:
     )
 
     comparison = analyzer.compare_discrete_vs_continuous(
-        loan, years
+        loan,
+        years
     )
 
-    st.table(pd.DataFrame([
-        ["Monthly", comparison["monthly_compounding"]],
-        ["Daily", comparison["daily_compounding"]],
-        ["Continuous", comparison["continuous_limit"]]
-    ], columns=["Compounding Method", "Future Value (PKR)"]))
+    comparison_df = pd.DataFrame(
+        [
+            [
+                "Monthly",
+                comparison["monthly_compounding"]
+            ],
+            [
+                "Daily",
+                comparison["daily_compounding"]
+            ],
+            [
+                "Continuous",
+                comparison["continuous_limit"]
+            ]
+        ],
+        columns=[
+            "Compounding Method",
+            "Future Value (PKR)"
+        ]
+    )
+
+    st.dataframe(
+        comparison_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
 
 # =====================================================
-# 4. AMORTIZATION SCHEDULE
+# 9. AMORTIZATION SCHEDULE
 # =====================================================
+
 elif selected == screens[3]:
 
     st.subheader("Monthly Amortization Schedule")
@@ -307,6 +454,7 @@ elif selected == screens[3]:
     rows = []
 
     for row in schedule:
+
         rows.append({
             "Month": row.month,
             "Opening Balance": row.opening_balance,
@@ -337,17 +485,22 @@ elif selected == screens[3]:
         mime="text/csv"
     )
 
+
 # =====================================================
-# 5. NUMERICAL & MATHEMATICAL LAB
+# 10. NUMERICAL & MATHEMATICAL LAB
 # =====================================================
+
 elif selected == screens[4]:
 
     st.subheader("Mathematical Analysis Lab")
 
-    mono = analyzer.verify_monotonic_decrease(schedule)
+    mono = analyzer.verify_monotonic_decrease(
+        schedule
+    )
 
     bounded = analyzer.verify_boundedness(
-        schedule, loan.principal
+        schedule,
+        loan.principal
     )
 
     implied = analyzer.solve_implied_annual_rate(
@@ -357,7 +510,8 @@ elif selected == screens[4]:
     )
 
     comparison = analyzer.compare_discrete_vs_continuous(
-        loan, 2
+        loan,
+        2
     )
 
     c1, c2 = st.columns(2)
@@ -375,12 +529,14 @@ elif selected == screens[4]:
     st.divider()
 
     st.markdown("### Bisection Method")
+
     st.metric(
         "Implied Annual Interest Rate",
         f"{implied * 100:.4f}%"
     )
 
     st.divider()
+
     st.markdown("### Compounding Analysis (2 Years)")
 
     c1, c2, c3 = st.columns(3)
@@ -406,14 +562,19 @@ elif selected == screens[4]:
         "and continuous compounding."
     )
 
+
 # =====================================================
-# 6. KYC VERIFICATION
+# 11. KYC VERIFICATION
 # =====================================================
+
 elif selected == screens[5]:
 
     st.subheader("Identity Verification Control")
 
-    st.write("Applicant:", applicant.full_name)
+    st.write(
+        "Applicant:",
+        applicant.full_name
+    )
 
     cnic = st.text_input(
         "Enter 13-digit CNIC",
@@ -421,28 +582,39 @@ elif selected == screens[5]:
     )
 
     st.warning(
-        "Demo verification only. This does not connect to NADRA "
-        "or verify the applicant's real identity."
+        "Demo verification only. This does not connect to "
+        "NADRA or verify the applicant's real identity."
     )
 
     if st.button("Verify CNIC Format"):
 
         if is_valid_cnic(cnic):
+
             applicant.cnic = cnic
             applicant.kyc_verified = True
-            st.success("CNIC format check passed.")
+
+            st.success(
+                "CNIC format check passed."
+            )
+
         else:
+
             applicant.kyc_verified = False
-            st.error("CNIC must contain exactly 13 digits.")
+
+            st.error(
+                "CNIC must contain exactly 13 digits."
+            )
 
     st.write(
         "KYC Status:",
         "Verified" if applicant.kyc_verified else "Pending"
     )
 
+
 # =====================================================
-# 7. DOCUMENT VAULT
+# 12. DOCUMENT VAULT
 # =====================================================
+
 elif selected == screens[6]:
 
     st.subheader("Document Management Vault")
@@ -454,28 +626,44 @@ elif selected == screens[6]:
     )
 
     if uploaded_files:
+
         for file in uploaded_files:
+
             if file.name not in applicant.documents_uploaded:
-                applicant.documents_uploaded.append(file.name)
+
+                applicant.documents_uploaded.append(
+                    file.name
+                )
 
     st.markdown("### Uploaded Documents")
 
     if applicant.documents_uploaded:
+
         for i, document in enumerate(
-            applicant.documents_uploaded, 1
+            applicant.documents_uploaded,
+            1
         ):
-            st.write(f"{i}. 📄 {document}")
+
+            st.write(
+                f"{i}. 📄 {document}"
+            )
+
     else:
-        st.info("No documents uploaded yet.")
+
+        st.info(
+            "No documents uploaded yet."
+        )
 
     st.caption(
-        "Demo application: uploaded files are not stored in a "
-        "secure permanent document vault."
+        "Demo application: uploaded files are not stored "
+        "in a secure permanent document vault."
     )
 
+
 # =====================================================
-# 8. TERMS & APR DISCLOSURE
+# 13. TERMS & APR DISCLOSURE
 # =====================================================
+
 elif selected == screens[7]:
 
     st.subheader("APR Disclosure & Loan Agreement")
@@ -491,7 +679,9 @@ elif selected == screens[7]:
     }
 
     for key, value in disclosures.items():
+
         c1, c2 = st.columns(2)
+
         c1.write(f"**{key}**")
         c2.write(value)
 
@@ -503,15 +693,22 @@ elif selected == screens[7]:
     )
 
     if st.button("Save Agreement Status"):
+
         app.terms_accepted = accepted
-        st.success(
-            "Agreement accepted."
-            if accepted else "Agreement not accepted."
-        )
+
+        if accepted:
+
+            st.success("Agreement accepted.")
+
+        else:
+
+            st.info("Agreement not accepted.")
+
 
 # =====================================================
-# 9. APPLICATION WORKFLOW
+# 14. APPLICATION WORKFLOW
 # =====================================================
+
 elif selected == screens[8]:
 
     st.subheader("Application Readiness & Workflow")
@@ -519,11 +716,16 @@ elif selected == screens[8]:
     eligible, message = app.is_eligible()
 
     checks = [
-        ("Income & Eligibility", eligible, message),
+        (
+            "Income & Eligibility",
+            eligible,
+            message
+        ),
         (
             "KYC Verification",
             applicant.kyc_verified,
-            "Demo KYC completed" if applicant.kyc_verified
+            "Demo KYC completed"
+            if applicant.kyc_verified
             else "Pending"
         ),
         (
@@ -534,34 +736,84 @@ elif selected == screens[8]:
         (
             "Terms Acceptance",
             app.terms_accepted,
-            "Accepted" if app.terms_accepted else "Pending"
+            "Accepted"
+            if app.terms_accepted
+            else "Pending"
         )
     ]
 
-    passed = sum(1 for item in checks if item[1])
+    passed = sum(
+        1 for item in checks if item[1]
+    )
+
     progress = passed / len(checks)
 
     st.progress(progress)
-    st.write(f"Application Readiness: {progress * 100:.0f}%")
+
+    st.write(
+        f"Application Readiness: {progress * 100:.0f}%"
+    )
 
     for title, status, detail in checks:
+
         if status:
-            st.success(f"✓ {title}: {detail}")
+
+            st.success(
+                f"✓ {title}: {detail}"
+            )
+
         else:
-            st.warning(f"○ {title}: {detail}")
 
-    approved = all(item[1] for item in checks)
+            st.warning(
+                f"○ {title}: {detail}"
+            )
 
-    app.status = "Approved" if approved else "In Review"
+    approved = all(
+        item[1] for item in checks
+    )
+
+    app.status = (
+        "Approved"
+        if approved
+        else "In Review"
+    )
 
     if approved:
-        st.success("APPLICATION STATUS: APPROVED")
+
+        st.success(
+            "APPLICATION STATUS: APPROVED"
+        )
+
     else:
-            c1, c2, c3 = st.columns(3)
+
+        st.warning(
+            "APPLICATION STATUS: IN REVIEW"
+        )
+
+        st.info(
+            "Complete all pending requirements to proceed."
+        )
+
+
+# =====================================================
+# 15. REPAYMENT & RECEIPTS
+# =====================================================
+
+elif selected == screens[9]:
+
+    st.subheader("Repayment Management")
+
+    # Count completed payments
+    paid = len(app.receipts)
+
+    total_months = int(loan.months)
+
+    # Payment summary
+    c1, c2, c3 = st.columns(3)
 
     c1.metric(
         "Payments Completed",
-        f"{paid}/{loan.months}"
+        f"{paid}/{total_months}"
     )
 
     c2.metric(
@@ -574,13 +826,19 @@ elif selected == screens[8]:
         str(len(app.receipts))
     )
 
-    paid = int(paid)
-    total_months = int(loan.months)
-
+    # Payment progress
     progress = paid / max(total_months, 1)
-    st.progress(min(max(progress, 0.0), 1.0))
+
+    st.progress(
+        min(max(progress, 0.0), 1.0)
+    )
+
+    st.write(
+        f"Repayment Progress: {progress * 100:.1f}%"
+    )
 
     st.divider()
+
     st.markdown("### Payment Records")
 
     if app.receipts:
@@ -588,50 +846,91 @@ elif selected == screens[8]:
         receipt_data = []
 
         for receipt in app.receipts:
+
             receipt_data.append({
                 "Receipt ID": receipt.receipt_id,
                 "Month": receipt.month_number,
+                "Amount Paid": receipt.amount_paid
             })
 
-        st.dataframe(
-            receipt_data,
-            use_container_width=True
+        receipt_df = pd.DataFrame(
+            receipt_data
         )
 
-    else:
-        st.info("No payment records available yet.")
+        st.dataframe(
+            receipt_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.download_button(
+            "Download Payment History (CSV)",
+            receipt_df.to_csv(index=False),
             file_name="LoanWise_Payment_History.csv",
             mime="text/csv"
         )
 
     else:
-        st.info("No payments recorded yet.")
+
+        st.info(
+            "No payments recorded yet."
+        )
 
     st.divider()
 
-    if st.button("Pay Next Installment & Generate Receipt"):
+    st.markdown("### Make Payment")
 
-        if app.status != "Approved":
-            st.warning(
-                "Complete all workflow requirements first."
-            )
+    if paid >= total_months:
 
-        else:
+        st.success(
+            "All installments have been paid."
+        )
+
+    elif app.status != "Approved":
+
+        st.warning(
+            "Complete and approve your application workflow first."
+        )
+
+    else:
+
+        st.write(
+            f"Next Installment: {paid + 1}"
+        )
+
+        if st.button(
+            "Pay Next Installment & Generate Receipt"
+        ):
+
             receipt = app.pay_next_installment()
 
             if receipt is None:
-                st.success("All installments have been paid.")
+
+                st.success(
+                    "All installments have been paid."
+                )
 
             else:
-                st.success("Payment recorded successfully!")
-                st.write(f"Receipt: {receipt.receipt_id}")
+
+                st.success(
+                    "Payment recorded successfully!"
+                )
+
+                st.write(
+                    f"Receipt ID: {receipt.receipt_id}"
+                )
+
                 st.write(
                     f"Amount: PKR {receipt.amount_paid:,.2f}"
                 )
 
             st.rerun()
 
-# ---------- FOOTER ----------
+
+# =====================================================
+# 16. FOOTER
+# =====================================================
+
 st.divider()
 
 st.caption(
