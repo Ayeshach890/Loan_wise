@@ -161,6 +161,8 @@ class Loan:
 
 
 @dataclass
+
+@dataclass
 class LoanApplication:
     app_id: str
     applicant: Applicant
@@ -168,25 +170,35 @@ class LoanApplication:
     status: str = "Pending"
     notes: str = ""
     receipts: list = field(default_factory=list)
+    terms_accepted: bool = False
+
+    @property
+    def paid_installments(self):
+        return self.receipts
+
     def refresh_status(self) -> tuple[bool, str]:
-     
-        eligible, reason = self.applicant.evaluate_eligibility(self.loan.calculate_emi())
+        eligible, reason = self.applicant.evaluate_eligibility(
+            self.loan.calculate_emi()
+        )
         self.status = "Eligible" if eligible else "Ineligible"
         self.notes = reason
         return eligible, reason
+
     def is_eligible(self):
         return self.refresh_status()
-    
+
     def pay_next_installment(self):
         from types import SimpleNamespace
 
         emi = self.loan.calculate_emi()
         installment_num = len(self.receipts) + 1
+
         receipt = SimpleNamespace(
             receipt_id=f"RCP-{self.app_id}-{installment_num:02d}",
             month=f"Month {installment_num}",
             month_number=installment_num,
             amount_paid=emi,
         )
+
         self.receipts.append(receipt)
         return receipt
