@@ -25,13 +25,11 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Overall screen */
 .stApp {
     background: #0F172A;
     color: #F8FAFC;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] {
     background: #111827;
 }
@@ -40,7 +38,6 @@ st.markdown("""
     font-size: 13px !important;
 }
 
-/* Main content */
 .block-container {
     padding-top: 1rem;
     padding-bottom: 0.5rem;
@@ -49,7 +46,6 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* Headings */
 h1 {
     font-size: 25px !important;
 }
@@ -62,12 +58,10 @@ h3 {
     font-size: 17px !important;
 }
 
-/* Normal text */
 p, label, span, li {
     font-size: 13px !important;
 }
 
-/* Metrics */
 [data-testid="stMetric"] {
     background: #1E293B;
     padding: 10px;
@@ -83,24 +77,20 @@ p, label, span, li {
     font-size: 12px !important;
 }
 
-/* Buttons */
 .stButton > button {
     font-size: 13px !important;
     padding: 5px 12px;
     border-radius: 7px;
 }
 
-/* Inputs */
 input, textarea {
     font-size: 13px !important;
 }
 
-/* Tables */
 [data-testid="stDataFrame"] {
     font-size: 12px;
 }
 
-/* Reduce spacing */
 div[data-testid="stVerticalBlock"] {
     gap: 0.7rem;
 }
@@ -111,6 +101,7 @@ hr {
 
 </style>
 """, unsafe_allow_html=True)
+
 
 # =====================================================
 # 3. INITIAL DATA
@@ -161,7 +152,8 @@ screens = [
     "Document Vault",
     "Terms & APR Disclosure",
     "Application Workflow",
-    "Repayment & Receipts"
+    "Repayment & Receipts",
+    "Bank Comparison"
 ]
 
 
@@ -846,12 +838,10 @@ elif selected == screens[9]:
 
     st.subheader("Repayment Management")
 
-    # Count completed payments
     paid = len(app.receipts)
 
     total_months = int(loan.months)
 
-    # Payment summary
     c1, c2, c3 = st.columns(3)
 
     c1.metric(
@@ -869,7 +859,6 @@ elif selected == screens[9]:
         str(len(app.receipts))
     )
 
-    # Payment progress
     progress = paid / max(total_months, 1)
 
     st.progress(
@@ -971,7 +960,266 @@ elif selected == screens[9]:
 
 
 # =====================================================
-# 16. FOOTER
+# 16. BANK COMPARISON
+# =====================================================
+
+elif selected == screens[10]:
+
+    st.subheader("🏦 Bank Loan Comparison")
+
+    st.write(
+        "Compare two banks based on interest rates, "
+        "processing fees, monthly EMI and total repayment."
+    )
+
+    st.info(
+        "Enter the loan rates and fees offered by the "
+        "banks to compare their estimated costs."
+    )
+
+    st.divider()
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.markdown("### Bank A")
+
+        bank_a = st.text_input(
+            "Bank A Name",
+            value="HBL",
+            key="bank_a_name"
+        )
+
+        rate_a = st.number_input(
+            "Annual Interest Rate (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=15.0,
+            key="rate_a"
+        )
+
+        fee_a = st.number_input(
+            "Processing Fee (PKR)",
+            min_value=0.0,
+            value=2000.0,
+            key="fee_a"
+        )
+
+    with col2:
+
+        st.markdown("### Bank B")
+
+        bank_b = st.text_input(
+            "Bank B Name",
+            value="UBL",
+            key="bank_b_name"
+        )
+
+        rate_b = st.number_input(
+            "Annual Interest Rate (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=13.0,
+            key="rate_b"
+        )
+
+        fee_b = st.number_input(
+            "Processing Fee (PKR)",
+            min_value=0.0,
+            value=1500.0,
+            key="fee_b"
+        )
+
+    st.divider()
+
+    st.markdown("### Common Loan Parameters")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        comparison_principal = st.number_input(
+            "Loan Amount (PKR)",
+            min_value=1.0,
+            value=500000.0,
+            key="comparison_principal"
+        )
+
+    with col2:
+
+        comparison_months = st.number_input(
+            "Loan Tenure (Months)",
+            min_value=1,
+            max_value=600,
+            value=24,
+            key="comparison_months"
+        )
+
+    def calculate_bank_emi(principal, annual_rate, months):
+
+        monthly_rate = annual_rate / 12
+
+        if monthly_rate == 0:
+            return principal / months
+
+        factor = (1 + monthly_rate) ** months
+
+        return (
+            principal * monthly_rate * factor
+        ) / (factor - 1)
+
+    if st.button(
+        "Compare Banks",
+        use_container_width=True
+    ):
+
+        if not bank_a.strip() or not bank_b.strip():
+
+            st.error(
+                "Please enter both bank names."
+            )
+
+        else:
+
+            emi_a = calculate_bank_emi(
+                comparison_principal,
+                rate_a / 100 / 12,
+                comparison_months
+            )
+
+            emi_b = calculate_bank_emi(
+                comparison_principal,
+                rate_b / 100 / 12,
+                comparison_months
+            )
+
+            interest_a = (
+                emi_a * comparison_months
+                - comparison_principal
+            )
+
+            interest_b = (
+                emi_b * comparison_months
+                - comparison_principal
+            )
+
+            total_a = (
+                emi_a * comparison_months + fee_a
+            )
+
+            total_b = (
+                emi_b * comparison_months + fee_b
+            )
+
+            st.session_state.bank_comparison_results = {
+                "bank_a": bank_a.strip(),
+                "bank_b": bank_b.strip(),
+                "emi_a": emi_a,
+                "emi_b": emi_b,
+                "interest_a": interest_a,
+                "interest_b": interest_b,
+                "total_a": total_a,
+                "total_b": total_b
+            }
+
+    if "bank_comparison_results" in st.session_state:
+
+        result = st.session_state.bank_comparison_results
+
+        st.divider()
+
+        st.subheader("Comparison Results")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.markdown(f"### {result['bank_a']}")
+
+            st.metric(
+                "Monthly EMI",
+                f"PKR {result['emi_a']:,.2f}"
+            )
+
+            st.metric(
+                "Total Interest",
+                f"PKR {result['interest_a']:,.2f}"
+            )
+
+            st.metric(
+                "Total Repayment (Including Fee)",
+                f"PKR {result['total_a']:,.2f}"
+            )
+
+        with col2:
+
+            st.markdown(f"### {result['bank_b']}")
+
+            st.metric(
+                "Monthly EMI",
+                f"PKR {result['emi_b']:,.2f}"
+            )
+
+            st.metric(
+                "Total Interest",
+                f"PKR {result['interest_b']:,.2f}"
+            )
+
+            st.metric(
+                "Total Repayment (Including Fee)",
+                f"PKR {result['total_b']:,.2f}"
+            )
+
+        st.divider()
+
+        st.subheader("Financial Cost Comparison")
+
+        comparison_chart = pd.DataFrame({
+            "Total Repayment (PKR)": [
+                result["total_a"],
+                result["total_b"]
+            ]
+        }, index=[
+            result["bank_a"],
+            result["bank_b"]
+        ])
+
+        st.bar_chart(comparison_chart)
+
+        difference = abs(
+            result["total_a"] - result["total_b"]
+        )
+
+        if result["total_a"] < result["total_b"]:
+
+            st.success(
+                f"{result['bank_a']} has a lower estimated "
+                f"total cost by PKR {difference:,.2f}."
+            )
+
+        elif result["total_b"] < result["total_a"]:
+
+            st.success(
+                f"{result['bank_b']} has a lower estimated "
+                f"total cost by PKR {difference:,.2f}."
+            )
+
+        else:
+
+            st.info(
+                "Both banks have the same estimated total cost."
+            )
+
+        st.caption(
+            "Academic comparison only. Rates and fees are "
+            "user-entered estimates, not verified bank offers. "
+            "Taxes, insurance and other charges are excluded."
+        )
+
+
+# =====================================================
+# 17. FOOTER
 # =====================================================
 
 st.divider()
